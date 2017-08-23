@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+        }
+
+        #boss {
+            width: 100%;
+            height: 600px;
+            background-color: rgba(0, 0, 0, 0.3);
+            position: relative;
+        }
+
+        #boss img {
+            position: absolute;
+            width: 200px;
+            height: 260px;
+            border: solid 2px #f0f0f0;
+            background-color: red;
+            cursor: pointer;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+    </style>
+</head>
+<body>
+<div id="boss">
+    <img src="" alt="">
+    <img src="" alt="">
+    <img src="" alt="">
+    <img src="" alt="">
+    <img src="" alt="">
+    <img src="" alt="">
+    <img src="" alt="">
+    <img src="" alt="">
+    <img src="" alt="">
+    <img src="" alt="">
+</div>
+<script>
+    var boss = document.getElementById("boss");
+    var img = boss.getElementsByTagName("img");
+    var xx = 0;
+    var yy = 0;
+    //放置图片位置，在此为2行5列
+    for (var i = 0; i < 10; i++) {
+        img[i].style.left = i % 5 * 240 + 'px';//图片宽度为200px,从第二张图片开始左边距为40px
+        img[i].style.top = parseInt(i / 5) * 300 + 'px';//margin-bottom:40px
+        dragDrop(img[i]);
+    }
+
+    //定义拖拽函数
+    function dragDrop(ele) {//ele:被拖拽的元素
+        ele.onmousedown = function (event) {
+            event = event || window.event;
+            event.preventDefault && event.preventDefault();
+            event.returnValue = false;
+            ele.setCapture && ele.setCapture();//全屏捕捉鼠标
+            var arr = [];
+            var firstL = ele.offsetLeft;//获取被拖拽元素的左边距
+            var firstT = ele.offsetTop;//获取被拖拽元素的上边距
+
+            var xx = event.clientX - ele.offsetLeft;//获取鼠标在被拖拽元素的相对位置
+            var yy = event.clientY - ele.offsetTop;//获取鼠标在被拖拽元素的相对位置
+            document.onmousemove = function (event) {
+                event = event || window.event;
+
+                var x = event.clientX - xx;//获取被拖拽元素的左边距；
+                var y = event.clientY - yy;//获取被拖拽元素的上边距；
+
+                var maxR = boss.offsetWidth - ele.offsetWidth;//被拖拽图片 能移动的最大水平距离
+                var maxT = boss.offsetHeight - ele.offsetHeight;//被拖拽图片 能移动的最大垂直距离
+
+                x = x < 0 ? 0 : x;//被拖拽元素不能移出可视区域的左侧
+                y = y < 0 ? 0 : y;//被拖拽元素不能移出可视区域的上侧
+                x = x > maxR ? maxR : x;//被拖拽元素不能移除可视区域的右侧
+                y = y > maxT ? maxT : y;//被拖拽元素不能移除可视区域的右侧
+
+                ele.style.left = x + 'px';//将计算出的左边距值赋给它的left
+                ele.style.top = y + 'px';//将计算出的左边距值赋给它的left
+
+                var a = checkCrash(ele, img[0]); //调用函数checheckCrash(),检测是否相撞
+                if (a == true) {
+                    console.log('撞衫了');
+                } else {
+                    console.log('安全');
+                }
+
+                for (var i = 0; i < img.length; i++) {
+                    img[i].style.zIndex = 1;
+                    img[i].style.transition = '';
+                    ele.style.zIndex = 111;
+                    if (img[i] !== ele) {
+                        if (checkCrash(ele, img[i]) == true) {
+                            arr.push(img[i]);//将图片加入到被替换队列
+                        }
+                    }
+                }
+            };
+            document.onmouseup = function () {
+                document.onmousemove = null;//鼠标抬起时，鼠标的移动事件就该取消了
+                document.onmouseup = null;
+                var obj;
+                var min = Infinity;//用min存储表示正无穷大的数值
+                if (arr) {//在onmousedown中定义了数组arr
+                    for (var i = 0; i < arr.length; i++) {
+                        var xxx = ele.offsetLeft - arr[i].offsetLeft;//获取被拖拽元素和要替换元素的水平边距
+                        var yyy = ele.offsetTop - arr[i].offsetTop;//获取被拖拽元素和要替换元素的垂直边距
+                        var c = xxx * xxx + yyy * yyy;//三角形的斜边
+                        if (Infinity > c) {
+                            Infinity = c;
+                            obj = arr[i];
+                        }
+                    }
+                    if (obj) {//onmouseup事件定义了obj
+                        ele.style.transition = "0.5s";
+                        obj.style.transition = "0.5s";
+
+                        ele.style.left = obj.style.left;//被拖拽元素放到替换元素的位置
+                        ele.style.top = obj.style.top;//被拖拽元素放到替换元素的位置
+                        obj.style.left = firstL + 'px';//被替换元素放到被拖拽元素的位置
+                        obj.style.top = firstT + 'px';//被替换元素放到被拖拽元素的位置
+
+                    } else {
+                        ele.style.transition = "0.5s";
+                        ele.style.left = firstL + 'px';//被拖拽元素回到原来的位置
+                        ele.style.top = firstT + 'px';//被拖拽元素回到原来的位置
+                    }
+                }
+                ele.releaseCapture && ele.releaseCapture();//释放全屏捕捉鼠标
+            };
+        }
+    }
+
+    function checkCrash(ele1, ele2) {
+        var ele1l = ele1.offsetLeft;
+        var ele1t = ele1.offsetTop;
+        var ele1w = ele1.offsetWidth;
+        var ele1h = ele1.offsetHeight;
+
+        var ele2l = ele2.offsetLeft;
+        var ele2t = ele2.offsetTop;
+        var ele2w = ele2.offsetWidth;
+        var ele2h = ele2.offsetHeight;
+
+        if (ele1l + ele1w < ele2l || ele1t + ele1h < ele2t || ele1t > ele2t + ele2h || ele1l > ele2l + ele2w) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+</script>
+</body>
+</html>

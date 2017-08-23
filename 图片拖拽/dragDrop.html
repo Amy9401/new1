@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        #boss {
+            width: 100%;
+            height: 600px;
+            background-color: rgba(0, 0, 0, .3);
+            position: relative;
+        }
+
+        #boss img {
+            position: absolute;
+            width: 200px;
+            height: 260px;
+            border: solid 2px #f0f0f0;
+            background-color: red;
+            cursor: pointer;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+    </style>
+</head>
+<body>
+<div id='boss'>
+    <img src="" alt="#"/>
+    <img src="" alt="#"/>
+    <img src="" alt="#"/>
+    <img src="" alt="#"/>
+    <img src="" alt="#"/>
+    <img src="" alt="#"/>
+    <img src="" alt="#"/>
+    <img src="" alt="#"/>
+    <img src="" alt="#"/>
+    <img src="" alt="#"/>
+</div>
+<script>
+    var boss = document.getElementById('boss');
+    var img = boss.getElementsByTagName('img');
+    var xx = 0;
+    var yy = 0;
+    for (var i = 0; i < 10; i++) {
+        img[i].style.left = i % 5 * 240 + 'px';
+        img[i].style.top = parseInt(i / 5) * 300 + 'px';
+        dragDrop(img[i]);
+    }
+    function dragDrop(ele) {
+        ele.onmousedown = function (event) {
+            event = event || window.event;
+            event.preventDefault && event.preventDefault();
+            event.returnValue = false;
+            ele.setCapture && ele.setCapture();
+            var arr = [];
+            var firstL = ele.offsetLeft;
+            var firstT = ele.offsetTop;
+
+            var xx = event.clientX - ele.offsetLeft;
+            var yy = event.clientY - ele.offsetTop;
+
+            document.onmousemove = function (event) {
+                event = event || window.event;
+
+                var x = event.clientX - xx;
+                var y = event.clientY - yy;
+
+                var maxR = boss.offsetWidth - ele.offsetWidth;
+                var maxT = boss.offsetHeight - ele.offsetHeight;
+
+                x = x < 0 ? 0 : x;
+                y = y < 0 ? 0 : y;
+                x = x > maxR ? maxR : x;
+                y = y > maxT ? maxT : y;
+
+                ele.style.left = x + 'px';
+                ele.style.top = y + 'px';
+
+                var a = checkCrash(ele, img[0]);
+
+                if (a == true) {
+                    console.log('撞衫了');
+                } else {
+                    console.log('安全');
+                }
+
+                for (var i = 0; i < img.length; i++) {
+                    img[i].style.zIndex = 1;
+                    img[i].style.transition = '';
+                    ele.style.zIndex = 111;
+                    if (img[i] !== ele) {
+                        if (checkCrash(ele, img[i]) == true) {
+                            arr.push(img[i]);
+                        }
+                    }
+                }
+
+            };
+            document.onmouseup = function () {
+                document.onmouseup = document.onmousemove = null;
+                var obj;
+                var min = Infinity;
+                if (arr) {
+                    for (var i = 0; i < arr.length; i++) {
+                        var xxx = ele.offsetLeft - arr[i].offsetLeft;
+                        var yyy = ele.offsetTop - arr[i].offsetTop;
+                        var c = xxx * xxx + yyy * yyy;
+                        if (Infinity > c) {
+                            Infinity = c;
+                            obj = arr[i];
+                        }
+                    }
+                    if (obj) {
+                        ele.style.transition = '0.5s';
+                        obj.style.transition = '0.5s';
+
+                        ele.style.left = obj.style.left;
+                        ele.style.top = obj.style.top;
+                        obj.style.left = firstL + 'px';
+                        obj.style.top = firstT + 'px';
+
+                    } else {
+                        ele.style.transition = '0.5s';
+                        ele.style.left = firstL + 'px';
+                        ele.style.top = firstT + 'px';
+                    }
+                }
+
+                ele.releaseCapture && ele.releaseCapture();
+            }
+        }
+    }
+    function checkCrash(ele1, ele2) {
+        var ele1l = ele1.offsetLeft;
+        var ele1t = ele1.offsetTop;
+        var ele1w = ele1.offsetWidth;
+        var ele1h = ele1.offsetHeight;
+
+        var ele2l = ele2.offsetLeft;
+        var ele2t = ele2.offsetTop;
+        var ele2w = ele2.offsetWidth;
+        var ele2h = ele2.offsetHeight;
+
+        if (ele1l + ele1w < ele2l || ele1t + ele1h < ele2t || ele1t > ele2t + ele2h || ele1l > ele2l + ele2w) {
+            return false;       //secure
+        } else {
+            return true;   //crashed
+        }
+
+
+    }
+</script>
+</body>
+</html>
+
+
+<!--<!DOCTYPE html>-->
+<!--<html lang="en">-->
+<!--<head>-->
+<!--<meta charset="UTF-8">-->
+<!--<title>Document</title>-->
+<!--<style>-->
+<!--* {-->
+<!--margin: 0;-->
+<!--padding: 0;-->
+<!--}-->
+
+<!--#boss {-->
+<!--width: 100%;-->
+<!--height: 600px;-->
+<!--background-color: rgba(0, 0, 0, .3);-->
+<!--position: relative;-->
+<!--}-->
+
+<!--#boss img {-->
+<!--position: absolute;-->
+<!--width: 200px;-->
+<!--height: 260px;-->
+<!--border: solid 2px #f0f0f0;-->
+<!--cursor: pointer;-->
+<!--<!-&#45;&#45;webkit-user-select: none;&ndash;&gt;-->
+<!--<!-&#45;&#45;moz-user-select: none;&ndash;&gt;-->
+<!--<!-&#45;&#45;ms-user-select: none;&ndash;&gt;-->
+<!--user-select: none;-->
+<!--}-->
+<!--</style>-->
+<!--</head>-->
+<!--<body>-->
+<!--<div id='boss'>-->
+<!--<img src="01.jpg" alt="#"/>-->
+<!--<img src="02.jpg" alt="#"/>-->
+<!--<img src="03.jpg" alt="#"/>-->
+<!--<img src="04.jpg" alt="#"/>-->
+<!--<img src="05.jpg" alt="#"/>-->
+<!--<img src="06.jpg" alt="#"/>-->
+<!--<img src="07.jpg" alt="#"/>-->
+<!--<img src="08.jpg" alt="#"/>-->
+<!--<img src="09.jpg" alt="#"/>-->
+<!--<img src="100.jpg" alt="#"/>-->
+<!--</div>-->
+
+<!--<script>-->
+<!--var boss = document.getElementById('boss');-->
+<!--var img = document.getElementsByTagName('img');-->
+
+<!--var arr = [];-->
+<!--var obj = null;-->
+<!--for (var i = 0; i < 10; i++) {-->
+<!--img[i].style.left =  i % 5 * 240 + 'px';-->
+<!--img[i].style.top = parseInt(i / 5) * 300 + 'px';-->
+<!--drag(img[i]);-->
+<!--}-->
+
+<!--function drag(ele) {-->
+<!--ele.onmousedown = function (event) {-->
+<!--event = event || window.event;-->
+<!--event.preventDefault && event.preventDefault();-->
+<!--event.returnValue = false;-->
+<!--ele.setCapture && ele.setCapture();-->
+
+<!--var firstX = ele.offsetLeft;-->
+<!--var firstY = ele.offsetTop;-->
+
+<!--var xx = event.clientX - ele.offsetLeft;-->
+<!--var yy = event.clientY - ele.offsetTop;-->
+
+
+<!--document.onmousemove = function (event) {-->
+<!--event = event || window.event;-->
+
+<!--var x = event.clientX - xx;-->
+<!--var y = event.clientY - yy;-->
+
+<!--x = x < 0 ? 0 : x;-->
+<!--y = y < 0 ? 0 : y;-->
+<!--x = x > boss.offsetWidth - ele.offsetWidth ? boss.offsetWidth - ele.offsetWidth : x;-->
+<!--y = y > boss.offsetHeight - ele.offsetHeight ? boss.offsetHeight - ele.offsetHeight : y;-->
+
+<!--ele.style.left = x + 'px';-->
+<!--ele.style.top = y + 'px';-->
+
+<!--//                for (var i = 0; i < img.length; i++) {-->
+<!--//                    if (checkCrash(ele, img[0])) {-->
+<!--//                        console.log('peng')-->
+<!--//                    } else {-->
+<!--//                        console.log('nope')-->
+<!--//                    }-->
+<!--//                }-->
+<!--//            }-->
+
+<!--for (var i = 0; i < img.length; i++) {-->
+<!--img[i].style.transition = '';-->
+<!--img[i].style.zIndex = 1;-->
+<!--ele.style.zIndex = 111;-->
+<!--if (img[i] != ele) {-->
+<!--if (checkCrash(ele, img[i])) {-->
+<!--arr.push(img[i]);-->
+<!--}-->
+<!--}-->
+<!--}-->
+
+<!--obj = null;-->
+<!--var min = Infinity;-->
+<!--if (arr.length) {-->
+<!--for (var i = 0; i < arr.length; i++) {-->
+<!--var xxx = arr[i].offsetLeft - ele.offsetLeft;-->
+<!--var yyy = arr[i].offsetTop - ele.offsetTop;-->
+<!--var c = xxx * xxx + yyy * yyy;-->
+<!--if (min > c) {-->
+<!--min = c;-->
+<!--obj = arr[i];-->
+<!--}-->
+<!--}-->
+<!--console.log(obj)-->
+<!--}-->
+
+<!--document.onmouseup = function () {-->
+<!--document.onmouseup = document.onmousemove = null;-->
+<!--ele.releaseCapture && ele.releaseCapture();-->
+
+<!--if (obj) {-->
+<!--ele.style.left = obj.offsetLeft + 'px';-->
+<!--ele.style.top = obj.offsetTop + 'px';-->
+<!--obj.style.left = firstX + 'px';-->
+<!--obj.style.top = firstY + 'px';-->
+<!--ele.style.transition = '0.5s';-->
+<!--obj.style.transition = '0.5s';-->
+<!--} else {-->
+<!--ele.style.transition = '0.5s';-->
+<!--ele.style.left = firstX + 'px';-->
+<!--ele.style.top = firstY + 'px';-->
+<!--}-->
+
+<!--}-->
+<!--}-->
+<!--}}-->
+
+<!--function checkCrash(ele1, ele2) {-->
+<!--var ele1l = ele1.offsetLeft;-->
+<!--var ele1t = ele1.offsetTop;-->
+<!--var ele1w = ele1.offsetWidth;-->
+<!--var ele1h = ele1.offsetHeight;-->
+
+<!--var ele2l = ele2.offsetLeft;-->
+<!--var ele2t = ele2.offsetTop;-->
+<!--var ele2w = ele2.offsetWidth;-->
+<!--var ele2h = ele2.offsetHeight;-->
+
+<!--if (ele1l + ele1w < ele2l || ele1t + ele1h < ele2t || ele1l > ele2l + ele2w || ele1t > ele2t + ele2h) {-->
+<!--return false;-->
+<!--} else {-->
+<!--return true;-->
+<!--}-->
+<!--}-->
+
+<!--//    function drag(ele) {-->
+<!--//-->
+<!--//        ele.onmousedown = function (event) {-->
+<!--//            event = event || window.event;-->
+<!--//-->
+<!--//            event.preventDefault && event.preventDefault();-->
+<!--//            event.returnValue = false;-->
+<!--//            ele.setCapture && ele.setCapture();-->
+<!--//-->
+<!--//            var firstL = ele.offsetLeft;-->
+<!--//            var firstT = ele.offsetTop;-->
+<!--//-->
+<!--//            var xx = event.clientX - ele.offsetLeft;-->
+<!--//            var yy = event.clientY - ele.offsetTop;-->
+<!--//-->
+<!--//            document.onmousemove = function (event) {-->
+<!--//                event = event || window.event;-->
+<!--//                var x = event.clientX - xx;-->
+<!--//                var y = event.clientY - yy;-->
+<!--//-->
+<!--//                x = x < 0 ? 0 : x;-->
+<!--//                y = y < 0 ? 0 : y;-->
+<!--//                x = x < boss.offsetWidth - ele.offsetWidth ? x : boss.offsetWidth - ele.offsetWidth;-->
+<!--//                y = y < boss.offsetHeight - ele.offsetHeight ? y : boss.offsetHeight - ele.offsetHeight;-->
+<!--//-->
+<!--//                var a = checkCrash(ele,img[3]);-->
+<!--//                if (a == true) {-->
+<!--//                    console.log('撞衫了');-->
+<!--//                }else {-->
+<!--//                    console.log('安全');-->
+<!--//                }-->
+<!--//-->
+<!--//                ele.style.left = x + 'px';-->
+<!--//                ele.style.top = y + 'px';-->
+<!--//-->
+<!--//                for (var i = 0; i < img.length; i++) {-->
+<!--//                    ele.style.index = 111;-->
+<!--//                    if (img[i] != ele ) {-->
+<!--//                        if (checkCrash(ele, img[i]) == true) {-->
+<!--//                            arr.push(img[i]);-->
+<!--//                        }-->
+<!--//                    }-->
+<!--//                }-->
+<!--//            }-->
+<!--//-->
+<!--//            document.onmouseup = function () {-->
+<!--//                document.onmousemove = document.onmouseup = null;-->
+<!--//                ele.releaseCapture && ele.releaseCapture();-->
+<!--//                var obj;-->
+<!--//                var min = Infinity;-->
+<!--//                if (arr) {-->
+<!--//                    for (var i = 0; i < arr.length; i++) {-->
+<!--//                        var yyy = ele.offsetTop - arr[i].offsetTop;-->
+<!--//                        var xxx = ele.offsetLeft - arr[i].offsetLeft;-->
+<!--//                        var c = xxx * xxx + yyy * yyy;-->
+<!--//                        if (min > c) {-->
+<!--//                            min = c;-->
+<!--//                            obj = arr[i];-->
+<!--//                        }-->
+<!--//                    }-->
+<!--//                if (obj) {-->
+<!--//                    ele.style.left = obj.style.left;-->
+<!--//                    ele.style.top = obj.style.top;-->
+<!--//                    obj.style.top = firstT + 'px';-->
+<!--//                    obj.style.left = firstL + 'px';-->
+<!--//                } else {-->
+<!--//                    ele.style.left = firstL + 'px';-->
+<!--//                    ele.style.top = firstT + 'px';-->
+<!--//                }-->
+<!--//            }-->
+<!--//        }-->
+<!--//        }-->
+<!--//    }-->
+<!--//    function checkCrash(ele1, ele2) {-->
+<!--//        var ele1l = ele1.offsetLeft;-->
+<!--//        var ele1t = ele1.offsetTop;-->
+<!--//        var ele1w = ele1.offsetWidth;-->
+<!--//        var ele1h = ele1.offsetHeight;-->
+<!--//-->
+<!--//        var ele2l = ele2.offsetLeft;-->
+<!--//        var ele2t = ele2.offsetTop;-->
+<!--//        var ele2w = ele2.offsetWidth;-->
+<!--//        var ele2h = ele2.offsetHeight;-->
+<!--//-->
+<!--//        if (ele1l + ele1w < ele2l || ele1t + ele1h < ele2t || ele1l > ele2l + ele2w || ele1t > ele2t + ele2h) {-->
+<!--//            return false;-->
+<!--//        } else {-->
+<!--//            return true;-->
+<!--//        }-->
+<!--//    }-->
+<!--</script>-->
+<!--</body>-->
+<!--</html>-->
